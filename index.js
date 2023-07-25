@@ -50,7 +50,7 @@ const run = async () => {
 
         const hashedPassword = await bcrypt.hash(password, 10);
         const token = jwt.sign({ email }, secretKey, {
-          expiresIn: "1h", // Set the token expiration time
+          expiresIn: "10s", // Set the token expiration time
         });
 
         // Create a new user object with the hashed password
@@ -78,9 +78,9 @@ const run = async () => {
         // Find the user by username
         const user = await userCollection.findOne({ email });
         if (!user) {
-          res
-            .status(401)
-            .json({ error: "User not found with this email. please register first" });
+          res.status(401).json({
+            error: "User not found with this email. please register first",
+          });
           return;
         }
 
@@ -90,7 +90,16 @@ const run = async () => {
           res.status(401).json({ error: "Invalid password" });
           return;
         }
-       
+
+        const token = req.header("Authorization")?.replace("Bearer ", "");
+        const decodedToken = jwt.decode(token);
+
+        if (!token) {
+          const token = jwt.sign({ email }, secretKey, {
+            expiresIn: "1h", // Set the token expiration time
+          });
+          await userCollection.findOneAndUpdate({ email }, { $set: { token } });
+        }
 
         res.json(user);
       } catch (error) {
@@ -103,10 +112,15 @@ const run = async () => {
     const verifyToken = (req, res, next) => {
       const token = req.header("Authorization")?.replace("Bearer ", "");
       if (!token) {
+        window.location.href("/login");
         return res.status(401).json({ error: "Access denied. Token missing." });
       }
 
       try {
+        if (!decodedToken || Date.now() >= decodedToken.exp * 1000) {
+          localStorage.removeItem("token");
+          window.location.href("/login");
+        }
         const decoded = jwt.verify(token, secretKey);
         req.user = decoded;
         next();
