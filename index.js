@@ -1,14 +1,12 @@
 const express = require("express");
 const { MongoClient } = require("mongodb");
 const { ObjectId } = require("mongodb");
-const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const cors = require("cors");
 require("dotenv").config();
 
 const app = express();
 const port = process.env.PORT || 5000;
-const secretKey = process.env.JWT_SECRET_KEY || "your-secret-key";
 
 app.use(cors());
 app.use(express.json());
@@ -39,31 +37,31 @@ const run = async () => {
     app.post("/register", async (req, res) => {
       try {
         const { name, email, password } = req.body;
-        console.log(req.body);
+        // console.log(req.body);
         // Check if the username already exists
         const existingUser = await userCollection.findOne({ email });
         if (existingUser) {
-          return res.status(400).json({ error: "User already exists" });
+          console.log(existingUser);
+          return res.send({ error: "User already exists" });
         }
 
         // Hash the password before storing it
 
         const hashedPassword = await bcrypt.hash(password, 10);
-        const token = jwt.sign({ email }, secretKey, {
-          expiresIn: "10s", // Set the token expiration time
-        });
 
         // Create a new user object with the hashed password
         const newUser = {
           name,
           email,
           password: hashedPassword,
-          token,
         };
         // console.log(newUser);
         const result = await userCollection.insertOne(newUser);
-        console.log(result);
-        res.json(result);
+        const user = await userCollection.findOne({
+          _id: new ObjectId(result.insertedId),
+        });
+        console.log(user);
+        res.json({ result, user });
       } catch (error) {
         console.log(error);
         res.status(500).json({ error: "Internal Server Error" });
@@ -73,12 +71,12 @@ const run = async () => {
     // User Login
     app.post("/login", async (req, res) => {
       try {
-        const { email, password } = req.body;
+        const { email, password, token } = req.body;
 
         // Find the user by username
         const user = await userCollection.findOne({ email });
         if (!user) {
-          res.status(401).json({
+          res.json({
             error: "User not found with this email. please register first",
           });
           return;
@@ -91,43 +89,12 @@ const run = async () => {
           return;
         }
 
-        const token = req.header("Authorization")?.replace("Bearer ", "");
-        const decodedToken = jwt.decode(token);
-
-        if (!token) {
-          const token = jwt.sign({ email }, secretKey, {
-            expiresIn: "1h", // Set the token expiration time
-          });
-          await userCollection.findOneAndUpdate({ email }, { $set: { token } });
-        }
-
-        res.json(user);
+        res.json({ user });
       } catch (error) {
         console.log(error);
         res.status(500).json({ error: "Internal Server Error" });
       }
     });
-
-    // Secure your APIs with JWT authentication middleware
-    const verifyToken = (req, res, next) => {
-      const token = req.header("Authorization")?.replace("Bearer ", "");
-      if (!token) {
-        window.location.href("/login");
-        return res.status(401).json({ error: "Access denied. Token missing." });
-      }
-
-      try {
-        if (!decodedToken || Date.now() >= decodedToken.exp * 1000) {
-          localStorage.removeItem("token");
-          window.location.href("/login");
-        }
-        const decoded = jwt.verify(token, secretKey);
-        req.user = decoded;
-        next();
-      } catch (error) {
-        res.status(401).json({ error: "Invalid token." });
-      }
-    };
 
     // post data
 
