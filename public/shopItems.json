@@ -1,0 +1,51 @@
+[
+  {
+    "id":1,
+    "img": "./p1.png",
+    "name": "Ring",
+    "price": 200
+  },
+  {
+    "id":2,
+    "img": "./p2.png",
+    "name": "Watch",
+    "price": 158
+  },
+  {
+    "id":3,
+    "img": "./p3.png",
+    "name": "Teddy Bear",
+    "price": 325
+  },
+  {
+    "id":4,
+    "img": "./p4.png",
+    "name": "Flower",
+    "price": 599
+  },
+  {
+    "id":5,
+    "img": "./p5.png",
+    "name": "Teddy Bear",
+    "price": 425
+  },
+  {
+    "id":6,
+    "img": "./p6.png",
+    "name": "Flower",
+    "price": 900
+  },
+  {
+    "id":7,
+    "img": "./p7.png",
+    "name": "Watch",
+    "price": 365
+  },
+  {
+    "id":8,
+    "img": "./p8.png",
+    "name": "Ring",
+    "price": 758
+  }
+  
+]
