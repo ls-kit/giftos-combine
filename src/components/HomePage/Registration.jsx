@@ -18,15 +18,16 @@ export default function Registration() {
     
     const res = await axios.post('http://localhost:5000/register',registrationData )
     console.log(res);
-    if(res.data?.result.acknowledged){
+    if(res.data.error){
+      toast.error(res.data.error)
+    }
+    if(res.data?.result?.acknowledged){
       localStorage.setItem("userData",JSON.stringify(res?.data.user))
       navigate("/")
       location.reload()
       toast.success("User registration sucessful. please login")
     }
-    if(res.data.error){
-      toast.error(res.data.error)
-    }
+    
 
 
     
