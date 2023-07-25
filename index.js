@@ -1,10 +1,14 @@
 const express = require("express");
 const { MongoClient } = require("mongodb");
 const { ObjectId } = require("mongodb");
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
 const cors = require("cors");
 require("dotenv").config();
+
 const app = express();
 const port = process.env.PORT || 5000;
+const secretKey = process.env.JWT_SECRET_KEY || "your-secret-key";
 
 app.use(cors());
 app.use(express.json());
@@ -30,6 +34,43 @@ const run = async () => {
     const database = client.db("crud-practice");
     // create a collection
     const userCollection = database.collection("user");
+
+    // User Registration
+    app.post("/register", async (req, res) => {
+      try {
+        const { name, email, password } = req.body;
+        console.log(req.body);
+        // Check if the username already exists
+        const existingUser = await userCollection.findOne({ email });
+        if (existingUser) {
+          return res.status(400).json({ error: "User already exists" });
+        }
+
+        // Hash the password before storing it
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const token = jwt.sign({ email }, secretKey, {
+          expiresIn: "1h", // Set the token expiration time
+        });
+
+        // Create a new user object with the hashed password
+        const newUser = {
+          name,
+          email,
+          password: hashedPassword,
+          token,
+        };
+        // console.log(newUser);
+        const result = await userCollection.insertOne(newUser);
+        console.log(result);
+        res.json(result);
+      } catch (error) {
+        console.log(error);
+        res.status(500).json({ error: "Internal Server Error" });
+      }
+    });
+
+  
 
     // post data
 
