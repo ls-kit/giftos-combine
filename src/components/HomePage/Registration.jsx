@@ -1,10 +1,9 @@
 import axios from "axios";
 import { useRef } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 
 export default function Registration() {
-  const navigate = useNavigate()
   const nameRef = useRef();
   const emailRef = useRef();
   const passwordRef = useRef();
@@ -18,9 +17,9 @@ export default function Registration() {
     
     const res = await axios.post('http://localhost:5000/register',registrationData )
     console.log(res);
-    if(res.data?.acknowledged){
+    if(res.data?.result.acknowledged){
       toast.success("User registration sucessful. please login")
-      navigate("/login")
+      localStorage.setItem("userData",JSON.stringify(res?.data.user))
     }
     if(res.data.error){
       toast.error(res.data.error)

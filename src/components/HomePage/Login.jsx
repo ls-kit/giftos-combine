@@ -1,3 +1,4 @@
+import axios from "axios";
 import { useRef } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -6,28 +7,23 @@ export default function Login() {
   const emailRef = useRef();
   const passwordRef = useRef();
 
-  const handleLogin = (e) => {
+  const handleLogin = async(e) => {
     e.preventDefault();
     const email = emailRef.current.value;
     const password = passwordRef.current.value;
-    // const loginData = {email,password}
-    // console.log(loginData)
-    const existingData = JSON.parse(localStorage.getItem("registrationData"));
-    if (
-      existingData &&
-      existingData.email === email &&
-      existingData.password === password
-    ) {
-      // Login success
-      // Show a success toast or alert
-      const welcomeMessage = `Login success! Welcome back <strong>${existingData.name}</strong>!`;
-      toast.success(
-        <div dangerouslySetInnerHTML={{ __html: welcomeMessage }} />
-      );
-    } else {
-      // Login failed, show an alert
-      toast.error("Invalid email or password. Please register first.");
+    const loginData = {email,password,}
+    console.log(loginData)
+    const res = await axios.post('http://localhost:5000/login',loginData )
+    console.log(res);
+    if(res.data.error){
+      toast.error(res.data.error)
     }
+    else{
+      const successText = `Welcome back <strong> ${res.data.name} </strong>`
+      toast.success(<div dangerouslySetInnerHTML={{ __html: successText }} />)
+      localStorage.setItem("userData",JSON.stringify(res?.data.user))
+    }
+    
   };
 
   return (
