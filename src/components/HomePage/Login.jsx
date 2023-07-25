@@ -1,9 +1,10 @@
 import axios from "axios";
 import { useRef } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
 export default function Login() {
+  const navigate = useNavigate()
   const emailRef = useRef();
   const passwordRef = useRef();
 
@@ -19,9 +20,12 @@ export default function Login() {
       toast.error(res.data.error)
     }
     else{
-      const successText = `Welcome back <strong> ${res.data.name} </strong>`
-      toast.success(<div dangerouslySetInnerHTML={{ __html: successText }} />)
+      console.log(res.data)
+      const successText = `Welcome back <strong> ${res.data.user.name} </strong>`
       localStorage.setItem("userData",JSON.stringify(res?.data.user))
+      navigate("/")
+      location.reload()
+      toast.success(<div dangerouslySetInnerHTML={{ __html: successText }} />)
     }
     
   };

@@ -3,7 +3,6 @@
 // import shopImg from '../../assets/images/p1.png'
 
 export default function ShopItem(props) {
-    console.log(props)
   const { name, img, price } = props.singleShopItem || {};
   return (
     <>

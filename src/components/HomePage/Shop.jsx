@@ -24,7 +24,6 @@ export default function Shop() {
           <div className="row">
             {
               shopItems?.map(singleShopItem=>{
-                console.log(singleShopItem);
                 return (
                   <ShopItem singleShopItem={singleShopItem} key={singleShopItem?.id}/>
                 )

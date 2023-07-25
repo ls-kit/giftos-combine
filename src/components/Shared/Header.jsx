@@ -1,6 +1,24 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import "../../index.css";
+import { useState } from "react";
+import { useEffect } from "react";
+
+
 export default function Header() {
+  const [userData, setUserData] = useState();
+  const navigate = useNavigate()
+
+ useEffect(()=>{
+  const userDataString = localStorage.getItem("userData");
+  setUserData(JSON.parse(userDataString));
+ },[])
+
+  const handleLogout = ()=>{
+    localStorage.setItem("userData", null)
+    navigate("/login")
+    location.reload()
+  }
+
   return (
     <div>
       {/* <!-- header section strats --> */}
@@ -50,10 +68,17 @@ export default function Header() {
               </li>
             </ul>
             <div className="user_option">
-              <Link to={"/login"}>
-                <i className="fa fa-user" aria-hidden="true"></i>
-                <span>Login</span>
-              </Link>
+              {userData ? (
+                <button  type="button" className="btn btn-secondary mx-3" onClick={handleLogout}>
+                  <i className="fa fa-user" aria-hidden="true"></i>
+                  <span className="ms-2">Logout</span>
+                </button>
+              ) : (
+                <Link to={"/login"}>
+                  <i className="fa fa-user" aria-hidden="true"></i>
+                  <span>Login</span>
+                </Link>
+              )}
               <Link to={"/cart"}>
                 <i className="fa fa-shopping-bag" aria-hidden="true"></i>
               </Link>
