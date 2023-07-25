@@ -1,3 +1,4 @@
+import axios from "axios";
 import { useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -8,43 +9,25 @@ export default function Registration() {
   const emailRef = useRef();
   const passwordRef = useRef();
 
-  const handleRegistration = (e) => {
+  const handleRegistration = async(e) => {
     e.preventDefault();
     const name = nameRef.current.value;
     const email = emailRef.current.value;
     const password = passwordRef.current.value;
     const registrationData = { name, email, password };
-    // console.log(registrationData);
-
-    // Save registration data to local storage
-    const existingData = JSON.parse(localStorage.getItem("registrationData"));
-    if (
-      existingData &&
-      existingData.email === email &&
-      existingData.password === password
-    ) {
-      // Login success
-      // Show a success toast or alert
-     toast.error("You already registered. Please login");
-     nameRef.current.value =''
-     emailRef.current.value =''
-     passwordRef.current.value =''
-     navigate("/login")
-    } else {
-      // User is not registered, save registration data to local storage
-     localStorage.setItem(
-        "registrationData",
-        JSON.stringify(registrationData)
-      );
-    toast.success("Successfully registered!. please login now!")
-     nameRef.current.value =''
-     emailRef.current.value =''
-     passwordRef.current.value =''
-    navigate("/login")
-      // Optionally, you can redirect to another page after saving the data.
-      // For example, after successful registration, redirect to a "success" page:
-      // window.location.href = "/success";
+    
+    const res = await axios.post('http://localhost:5000/register',registrationData )
+    console.log(res);
+    if(res.data?.acknowledged){
+      toast.success("User registration sucessful. please login")
+      navigate("/login")
     }
+    if(res.data.error){
+      toast.error(res.data.error)
+    }
+
+
+    
   };
 
   return (
